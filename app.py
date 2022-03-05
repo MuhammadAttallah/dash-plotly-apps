@@ -1,6 +1,11 @@
+from ast import Break
+from cProfile import label
+from tkinter import Label
+from turtle import ht
 from dash import Dash, dcc, html
 import plotly.express as px
 from siphon.simplewebservice.ndbc import NDBC
+
 
 app = Dash(__name__)
 
@@ -10,7 +15,35 @@ print(df.columns)
 fig = px.scatter(df, x="water_temperature", y="air_temperature",
                  color="pressure", hover_name="station")
 
-app.layout = html.Div([dcc.Graph(id="buoy-correlations", figure=fig)])
+app.layout = html.Div([
+    html.Div([
+        html.H1("NDBC Network Data", style={"textAlign":"center"})
+        ]),
+    html.Div([
+        html.Div([], style={"width":"10%"}),
+        html.Div([
+            html.Label("X variable"),
+            html.Br(),
+            dcc.Dropdown(df.columns, "water_temperature")
+            ], style={"width":"20%"}),
+        html.Div([], style={"width":"10%"}),
+        html.Div([
+            html.Label("Y variable"),
+            html.Br(),
+            dcc.Dropdown(df.columns, "air_temperature")
+            ], style={"width":"20%"}),
+        html.Div([], style={"width":"10%"}),
+        html.Div([
+            html.Label("Color variable"),
+            html.Br(),
+            dcc.Dropdown(df.columns, "pressure")
+            ], style={"width":"20%"}),
+        html.Div([], style={"width":"10%"})
+        ], style={"display":"flex", "flex-direction":"row"}),
+    html.Div([
+        dcc.Graph(id="buoy-correlations", figure=fig)
+        ])
+    ])
 
 if __name__=="__main__":
     app.run_server(debug=True)
