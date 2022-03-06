@@ -1,8 +1,4 @@
-from ast import Break
-from cProfile import label
-from tkinter import Label
-from turtle import ht
-from dash import Dash, dcc, html
+from dash import Dash, dcc, html, Input, Output
 import plotly.express as px
 from siphon.simplewebservice.ndbc import NDBC
 
@@ -12,8 +8,18 @@ app = Dash(__name__)
 df = NDBC.latest_observations()
 print(df.columns)
 
-fig = px.scatter(df, x="water_temperature", y="air_temperature",
-                 color="pressure", hover_name="station")
+@app.callback(
+    Output("buoy-correlations", "figure"),
+    Input("xvar-dropdown", "value"),
+    Input("yvar-dropdown", "value"),
+    Input("cvar-dropdown", "value")
+)
+
+def update_figure(x_var, y_var, c_var):
+    fig = px.scatter(df, x=x_var, y=y_var,
+                     color=c_var, hover_name="station")
+    fig.update_layout(transition_duration=1000)
+    return fig
 
 app.layout = html.Div([
     html.Div([
@@ -24,24 +30,24 @@ app.layout = html.Div([
         html.Div([
             html.Label("X variable"),
             html.Br(),
-            dcc.Dropdown(df.columns, "water_temperature")
+            dcc.Dropdown(df.columns, "water_temperature", id="xvar-dropdown")
             ], style={"width":"20%"}),
         html.Div([], style={"width":"10%"}),
         html.Div([
             html.Label("Y variable"),
             html.Br(),
-            dcc.Dropdown(df.columns, "air_temperature")
+            dcc.Dropdown(df.columns, "air_temperature", id="yvar-dropdown")
             ], style={"width":"20%"}),
         html.Div([], style={"width":"10%"}),
         html.Div([
             html.Label("Color variable"),
             html.Br(),
-            dcc.Dropdown(df.columns, "pressure")
+            dcc.Dropdown(df.columns, "pressure", id="cvar-dropdown")
             ], style={"width":"20%"}),
         html.Div([], style={"width":"10%"})
         ], style={"display":"flex", "flex-direction":"row"}),
     html.Div([
-        dcc.Graph(id="buoy-correlations", figure=fig)
+        dcc.Graph(id="buoy-correlations")
         ])
     ])
 
